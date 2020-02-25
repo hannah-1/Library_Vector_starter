@@ -1,4 +1,17 @@
 #include "../includes_usr/fileIO.h"
+#include "../includes_usr/datastructures.h"
+#include "../includes_usr/constants.h"
+
+#include <stdlib.h>
+#include <fstream>
+#include <iostream>
+#include <vector>
+#include <sstream>
+#include <string>
+#include <list>
+#include <algorithm>
+
+
 using namespace std;
 /* clears, then loads books from the file filename
  * returns  COULD_NOT_OPEN_FILE if cannot open filename
@@ -7,6 +20,35 @@ using namespace std;
  * */
 int loadBooks(std::vector<book> &books, const char* filename)
 {
+	ifstream myfile;
+	myfile.open(filename);
+	if (!myfile.is_open())
+		return COULD_NOT_OPEN_FILE;
+
+	std::string line;
+	book myBooks;
+	stringstream ss;
+	char CHAR_TO_SEARCH_FOR = ',';
+
+	while (!myfile.eof()) {
+		getline(myfile, line); //get a line from the file
+		ss.str(line);
+
+		//get rid of the old values
+		myBooks = book();
+
+		//get the name
+		getline(ss, myBooks.title, CHAR_TO_SEARCH_FOR);
+
+		//get the author
+		getline(ss, myBooks.author, CHAR_TO_SEARCH_FOR);
+
+		//finally add to array
+		books.push_back(myBooks);
+
+		//clear stream so it will work for next read
+		ss.clear();
+	}
 	return SUCCESS;
 }
 
