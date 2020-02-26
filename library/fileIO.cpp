@@ -81,6 +81,25 @@ int loadBooks(std::vector<book> &books, const char* filename)
  * */
 int saveBooks(std::vector<book> &books, const char* filename)
 {
+	ifstream myfile;
+	myfile.open(filename);
+	if (!myfile.is_open())
+		return COULD_NOT_OPEN_FILE;
+	if (books.empty()){
+		return NO_BOOKS_IN_LIBRARY;
+	}
+
+	string mydata;
+		for (int var = 0; var < books.size(); ++var) {
+			mydata = to_string(books[var].book_id) + "," +
+					books[var].title + "," + books[var].author +
+					to_string(books[var].loaned_to_patron_id);
+			myfile<<mydata<<std::endl;
+		}
+
+		if (myfile.is_open())
+			myfile.close();
+
 	return SUCCESS;
 }
 
