@@ -32,14 +32,14 @@ int stringToInt(string &myString) {
  * 			NO_BOOKS_IN_LIBRARY if there are 0 entries in books
  * 			SUCCESS if all data is loaded
  * */
-int loadBooks(std::vector<book> &books, const char* filename)
-{
+int loadBooks(std::vector<book> &books, const char* filename){
 	ifstream myfile;
 	myfile.open(filename);
 	if (!myfile.is_open())
 		return COULD_NOT_OPEN_FILE;
 
 	std::string line;
+	int bookStr;
 	book myBooks;
 	stringstream ss;
 	char CHAR_TO_SEARCH_FOR = ',';
@@ -53,11 +53,23 @@ int loadBooks(std::vector<book> &books, const char* filename)
 		//get rid of the old values
 		myBooks = book();
 
+		//get the id
+		getline(ss, bookStr, CHAR_TO_SEARCH_FOR);
+		myBooks.book_id = stringToInt(bookStr);
+
 		//get the name
 		getline(ss, myBooks.title, CHAR_TO_SEARCH_FOR);
 
 		//get the author
 		getline(ss, myBooks.author, CHAR_TO_SEARCH_FOR);
+
+		//get the state
+		getline(ss, bookStr, CHAR_TO_SEARCH_FOR);
+		myBooks.state = stringToInt(bookStr);
+
+		//get the id of the patron who check it out
+		getline(ss, bookStr, CHAR_TO_SEARCH_FOR);
+		myBooks.loaned_to_patron_id = stringToInt(bookStr);
 
 		//finally add to array
 		books.push_back(myBooks);
@@ -93,8 +105,9 @@ int saveBooks(std::vector<book> &books, const char* filename)
 		for (int var = 0; var < books.size(); ++var) {
 			mydata = to_string(books[var].book_id) + "," +
 					books[var].title + "," + books[var].author +
+					to_string(books[var].state) +
 					to_string(books[var].loaned_to_patron_id);
-			myfile<<mydata<<std::endl;
+			myfile<<mydata<<endl;
 		}
 
 		if (myfile.is_open())
@@ -131,11 +144,14 @@ int loadPatrons(std::vector<patron> &patrons, const char* filename)
 		//get rid of the old values
 		patronIn = patron();
 
-		//get the name
+		//get the id
 		getline(ss, patronStr, CHAR_TO_SEARCH_FOR);
 		patronIn.patron_id = stringToInt(patronStr);
 
-		//get the author
+		//get the name
+		getline(ss, patronIn.name, CHAR_TO_SEARCH_FOR);
+
+		//get the number of books checked out
 		getline(ss, numberStr, CHAR_TO_SEARCH_FOR);
 		patronIn.number_books_checked_out = stringToInt(numberStr);
 
@@ -159,7 +175,24 @@ int loadPatrons(std::vector<patron> &patrons, const char* filename)
  * 			NO_PATRONS_IN_LIBRARY if there are 0 entries in patrons  (do not create file)
  * 			SUCCESS if all data is saved
  * */
-int savePatrons(std::vector<patron> &patrons, const char* filename)
-{
+int savePatrons(std::vector<patron> &patrons, const char* filename){
+	ifstream myfile;
+	myfile.open(filename);
+	if (!myfile.is_open())
+		return COULD_NOT_OPEN_FILE;
+	if (patrons.empty()){
+		return NO_PATRONS_IN_LIBRARY;
+		}
+
+	string mydata;
+	for (int var = 0; var < patrons.size(); ++var) {
+		mydata = to_string(patrons[var].patron_id) + "," +
+				patrons[var].name + "," +
+				to_string(patrons[var].number_books_checked_out);
+		myfile<<mydata<<endl;
+		}
+
+	if (myfile.is_open())
+		myfile.close();
 	return SUCCESS;
 }
