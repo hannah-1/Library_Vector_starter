@@ -11,11 +11,10 @@
 #include <list>
 #include <algorithm>
 
-
 using namespace std;
 
-//if myString does not contain a string rep of number returns o
-//if int not large enough has undefined behaviour, very fragile
+//if myString does not contain a string representation of number returns o
+//if integer not large enough has undefined behavior, very fragile
 int stringToInt(string &myString) {
 	//get rid of spaces
 	while(myString.size() && isspace(myString.front()))
@@ -39,15 +38,13 @@ int loadBooks(std::vector<book> &books, const char* filename){
 		return COULD_NOT_OPEN_FILE;
 
 	std::string line;
-	int bookStr;
+	std::string bookStr;
 	book myBooks;
-	stringstream ss;
 	char CHAR_TO_SEARCH_FOR = ',';
 	int lineCounter = 0;
 
-	while (!myfile.eof()) {
-		getline(myfile, line); //get a line from the file
-		ss.str(line);
+	while (getline(myfile, line)) {
+		istringstream ss(line);
 		lineCounter++;
 
 		//get rid of the old values
@@ -65,7 +62,19 @@ int loadBooks(std::vector<book> &books, const char* filename){
 
 		//get the state
 		getline(ss, bookStr, CHAR_TO_SEARCH_FOR);
-		myBooks.state = stringToInt(bookStr);
+		switch (stringToInt(bookStr)){
+			case 0:
+				myBooks.state = UNKNOWN;
+				break;
+			case 1:
+				myBooks.state = IN;
+				break;
+			case 2:
+				myBooks.state = OUT;
+				break;
+			default:
+				myBooks.state = UNKNOWN;
+		}
 
 		//get the id of the patron who check it out
 		getline(ss, bookStr, CHAR_TO_SEARCH_FOR);
@@ -93,7 +102,7 @@ int loadBooks(std::vector<book> &books, const char* filename){
  * */
 int saveBooks(std::vector<book> &books, const char* filename)
 {
-	ifstream myfile;
+	ofstream myfile;
 	myfile.open(filename);
 	if (!myfile.is_open())
 		return COULD_NOT_OPEN_FILE;
@@ -101,13 +110,13 @@ int saveBooks(std::vector<book> &books, const char* filename)
 		return NO_BOOKS_IN_LIBRARY;
 	}
 
-	string mydata;
+	std::string mydata = "";
 		for (int var = 0; var < books.size(); ++var) {
 			mydata = to_string(books[var].book_id) + "," +
-					books[var].title + "," + books[var].author +
-					to_string(books[var].state) +
+					books[var].title + "," + books[var].author + "," +
+					to_string(books[var].state) + "," +
 					to_string(books[var].loaned_to_patron_id);
-			myfile<<mydata<<endl;
+			myfile << mydata << endl;
 		}
 
 		if (myfile.is_open())
@@ -123,22 +132,20 @@ int saveBooks(std::vector<book> &books, const char* filename)
  * */
 int loadPatrons(std::vector<patron> &patrons, const char* filename)
 {
-	ifstream myfile;
-	myfile.open(filename);
-	if (!myfile.is_open())
+	ifstream myfile(filename);
+	if (!myfile)
 		return COULD_NOT_OPEN_FILE;
 
-	std::string line;
-	std::string numberStr;
-	std::string patronStr;
-	patron patronIn;
-	stringstream ss;
+	std::string line = "";
+	std::string numberStr = "";
+	std::string patronStr = "";
 	char CHAR_TO_SEARCH_FOR = ',';
 	int lineCounter = 0;
 
-	while (!myfile.eof()) {
-		getline(myfile, line); //get a line from the file
-		ss.str(line);
+	patron patronIn;
+
+	while (getline(myfile, line)) {
+		istringstream ss(line);
 		lineCounter++;
 
 		//get rid of the old values
@@ -176,7 +183,7 @@ int loadPatrons(std::vector<patron> &patrons, const char* filename)
  * 			SUCCESS if all data is saved
  * */
 int savePatrons(std::vector<patron> &patrons, const char* filename){
-	ifstream myfile;
+	ofstream myfile;
 	myfile.open(filename);
 	if (!myfile.is_open())
 		return COULD_NOT_OPEN_FILE;
@@ -189,7 +196,7 @@ int savePatrons(std::vector<patron> &patrons, const char* filename){
 		mydata = to_string(patrons[var].patron_id) + "," +
 				patrons[var].name + "," +
 				to_string(patrons[var].number_books_checked_out);
-		myfile<<mydata<<endl;
+		myfile << mydata << endl;
 		}
 
 	if (myfile.is_open())
