@@ -145,16 +145,12 @@ int checkin(int bookid){
 int enroll(std::string &name){
 	loadPatrons(patrons, PATRONFILE.c_str());
 
-//	for (patron patron : patrons) {
-//		if (name == patron.name){
-//			return DUPLICATE_NAME;
-//		}
-	patron newPatron;
+	patron newPatron = patron();
 	newPatron.name = name;
 	newPatron.patron_id = patrons.size();
 
 	patrons.push_back(newPatron);
-	savePatrons(patrons, TMP_FILE.c_str());
+	savePatrons(patrons, PATRONFILE.c_str());
 
 	return newPatron.patron_id;
 }
@@ -165,6 +161,7 @@ int enroll(std::string &name){
  * 
  */
 int numbBooks(){
+	reloadAllData();
 	return books.size();
 }
 
@@ -173,6 +170,7 @@ int numbBooks(){
  * (ie. if 3 patrons returns 3)
  */
 int numbPatrons(){
+	reloadAllData();
 	return patrons.size();
 }
 
@@ -196,11 +194,15 @@ int howmanybooksdoesPatronHaveCheckedOut(int patronid){
  *         PATRON_NOT_ENROLLED no patron with this patronid
  */
 int whatIsPatronName(std::string &name,int patronid){
-		for (patron patron : patrons) {
-			if (patronid == patron.patron_id){
-				return SUCCESS;
-			}
-		}
+if (isPatronInVector(patronid) == PATRON_NOT_ENROLLED) {
 	return PATRON_NOT_ENROLLED;
+	}
+
+patron tmpPatron = getPatron(patronid);
+if (tmpPatron.name == name && tmpPatron.patron_id == patronid){
+	return SUCCESS;
+	}
+
+return PATRON_NOT_ENROLLED;
 }
 
