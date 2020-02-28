@@ -17,6 +17,8 @@ using namespace std;
 vector<patron> patrons;
 vector<book> books;
 
+//helper function to find out if the patronid given corresponds to
+//an existing patron in the patron vector
 int isPatronInVector(int patronId) {
 	for (patron searchpatron : patrons) {
 		if (patronId == searchpatron.patron_id){
@@ -26,6 +28,7 @@ int isPatronInVector(int patronId) {
 	return PATRON_NOT_ENROLLED;
 }
 
+//helper function to return the info related to the given patronid
 patron getPatron(int patronId) {
 	for (patron searchpatron : patrons) {
 		if (patronId == searchpatron.patron_id){
@@ -35,6 +38,8 @@ patron getPatron(int patronId) {
 	return patron();
 }
 
+//helper function to find out if the bookid given corresponds to
+//an existing book in the book vector
 int isBookInVector(int bookId) {
 	for (book searchbook : books) {
 		if (bookId == searchbook.book_id){
@@ -44,6 +49,7 @@ int isBookInVector(int bookId) {
 	return BOOK_NOT_IN_COLLECTION;
 }
 
+//helper function to return the info related to the given bookid
 book getBook(int bookId){
 	for (book searchbook : books) {
 			if (bookId == searchbook.book_id){
