@@ -87,28 +87,26 @@ void reloadAllData(){
  */
 int checkout(int bookid, int patronid){
 	reloadAllData();
-	book book;
-	patron patron;
+	book book = getBook(bookid);
+	patron patron = getPatron(patronid);
 
-	if (isBookInVector(bookid) == BOOK_NOT_IN_COLLECTION) {
+	if (isBookInVector(bookid) != SUCCESS) {
 		return BOOK_NOT_IN_COLLECTION;
 		}
-	if (isPatronInVector(patronid) == PATRON_NOT_ENROLLED) {
+	if (isPatronInVector(patronid) != SUCCESS) {
 		return PATRON_NOT_ENROLLED;
 		}
-
-	patron = getPatron(patronid);
-	book = getBook(bookid);
 
 	if (book.state == OUT || book.state == UNKNOWN){
 		return NOT_AVAILABLE;
 		}
-	if (patron.number_books_checked_out > MAX_BOOKS_ALLOWED_OUT) {
+	if (patron.number_books_checked_out == MAX_BOOKS_ALLOWED_OUT) {
 			return TOO_MANY_OUT;
 		}
 
-	book.state = OUT;
-	book.loaned_to_patron_id = patronid;
+	books[book.book_id].state = OUT;
+	books[book.book_id].loaned_to_patron_id = patronid;
+	patrons[patron.patron_id].number_books_checked_out++;
 
 	saveBooks(books, BOOKFILE.c_str());
 	savePatrons(patrons, PATRONFILE.c_str());
@@ -130,6 +128,21 @@ int checkout(int bookid, int patronid){
  * 		   BOOK_NOT_IN_COLLECTION
  */
 int checkin(int bookid){
+	reloadAllData();
+	book book = getBook(bookid);
+	patron patron = getPatron(book.loaned_to_patron_id);
+
+
+	if (isBookInVector(bookid) != SUCCESS){
+		return BOOK_NOT_IN_COLLECTION;
+	}
+	books[book.book_id].state = IN;
+	books[book.book_id].loaned_to_patron_id = NO_ONE;
+	patrons[patron.patron_id].number_books_checked_out--;
+
+	saveBooks(books, BOOKFILE.c_str());
+	savePatrons(patrons, PATRONFILE.c_str());
+
 	return SUCCESS;
 }
 
@@ -180,7 +193,7 @@ int numbPatrons(){
  *        or PATRON_NOT_ENROLLED         
  */
 int howmanybooksdoesPatronHaveCheckedOut(int patronid){
-	if(isPatronInVector(patronid) == PATRON_NOT_ENROLLED){
+	if(isPatronInVector(patronid) != SUCCESS){
 		return PATRON_NOT_ENROLLED;
 	}
 	patron tmpPatron = getPatron(patronid);
@@ -194,15 +207,15 @@ int howmanybooksdoesPatronHaveCheckedOut(int patronid){
  *         PATRON_NOT_ENROLLED no patron with this patronid
  */
 int whatIsPatronName(std::string &name,int patronid){
-if (isPatronInVector(patronid) == PATRON_NOT_ENROLLED) {
+	if (isPatronInVector(patronid) == PATRON_NOT_ENROLLED) {
+		return PATRON_NOT_ENROLLED;
+	}
+
+	patron tmpPatron = getPatron(patronid);
+	if (tmpPatron.name == name && tmpPatron.patron_id == patronid){
+		return SUCCESS;
+		}
+
 	return PATRON_NOT_ENROLLED;
-	}
-
-patron tmpPatron = getPatron(patronid);
-if (tmpPatron.name == name && tmpPatron.patron_id == patronid){
-	return SUCCESS;
-	}
-
-return PATRON_NOT_ENROLLED;
 }
 

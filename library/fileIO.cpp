@@ -132,6 +132,7 @@ int saveBooks(std::vector<book> &books, const char* filename)
  * */
 int loadPatrons(std::vector<patron> &patrons, const char* filename)
 {
+	patrons.clear();
 	ifstream myfile(filename);
 	if (!myfile)
 		return COULD_NOT_OPEN_FILE;
@@ -184,7 +185,7 @@ int loadPatrons(std::vector<patron> &patrons, const char* filename)
  * */
 int savePatrons(std::vector<patron> &patrons, const char* filename){
 	ofstream myfile;
-	myfile.open(filename);
+	myfile.open(filename, ios::out | ios::trunc);
 	if (!myfile.is_open())
 		return COULD_NOT_OPEN_FILE;
 	if (patrons.empty()){
